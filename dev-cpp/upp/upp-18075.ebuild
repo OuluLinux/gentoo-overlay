@@ -1,6 +1,8 @@
 # Copyright 2025 OuluLinux
 # Distributed under the terms of the GNU General Public License v3
 
+EAPI=8
+
 DESCRIPTION="Ultimate++ Framework"
 HOMEPAGE="http://www.ultimatepp.org/"
 SRC_URI="https://www.ultimatepp.org/downloads/upp-posix-${PV}.tar.xz"
