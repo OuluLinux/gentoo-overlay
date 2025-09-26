@@ -27,7 +27,7 @@ sync-uri = https://github.com/oululinux/gentoo-overlay.git
 3. Sync the new overlay:
 
 ```bash
-emerge --sync oululinux
+emaint sync -r oululinux
 ```
 
 4. Install a package, for example:
