@@ -3,7 +3,7 @@
 
 EAPI=8
 
-inherit flag-o-matic toolchain-funcs wrapper xdg
+inherit desktop flag-o-matic toolchain-funcs wrapper xdg
 
 DESCRIPTION="Tesseract-Sauerbraten is a FOSS game engine (Cube 2 + Tesseract) with freeware game data (Sauerbraten)"
 HOMEPAGE="http://sauerbraten.org/"
@@ -43,7 +43,8 @@ PATCHES=(
 
 	# Don't use freetype-config, it's obsolete
 	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-use-pkg-config-for-freetype2.patch
-	# More sensible ways of including SDL_mixer and SDL_image. Game doesn't build w/o this.
+
+	# More sensible SDL include handling
 	"${FILESDIR}"/tesseract-sauerbraten-2020.12.29-includefix.patch
 )
 
@@ -52,16 +53,13 @@ src_prepare() {
 
 	default
 
-	# Fix links so they point to the correct directory
 	sed -i -e 's:docs/::' README.html || die
 }
 
 src_compile() {
 	tc-export CXX PKG_CONFIG
 
-	if use debug ; then
-		append-cppflags -D_DEBUG
-	fi
+	use debug && append-cppflags -D_DEBUG
 
 	emake -C src \
 		master \
@@ -69,74 +67,54 @@ src_compile() {
 }
 
 src_install() {
-	local LIBEXECDIR="/usr/lib"
-	local DATADIR="/usr/share/${PN}"
-	local STATEDIR="/var/lib/${PN}"
+	local libexecdir="/usr/lib"
+	local datadir="/usr/share/${PN}"
+	local statedir="/var/lib/${PN}"
 
 	if ! use dedicated ; then
-		# Install the game data
-		insinto "${DATADIR}"
+		insinto "${datadir}"
 		doins -r data packages
 
-		# Install the client executable
-		exeinto "${LIBEXECDIR}"
+		exeinto "${libexecdir}"
 		doexe src/tess_client
 
-		# Install the client wrapper
-		make_wrapper "${PN}-client" "${LIBEXECDIR}/tess_client -q\$HOME/.${PN} -r" "${DATADIR}"
+		make_wrapper "${PN}-client" "${libexecdir}/tess_client -q\$HOME/.${PN} -r" "${datadir}"
 
-		# Create menu entry
 		newicon -s 256 data/cube.png ${PN}.png
-		cat <<-EOF > "${T}/${PN}.desktop" || die
-[Desktop Entry]
-Name=Cube 2: Tesseract-Sauerbraten
-Type=Application
-Comment=First-person shooter built on the Tesseract-enhanced Cube 2 engine
-Exec=${PN}-client
-Icon=${PN}
-Categories=Game;ActionGame;
-EOF
-		insinto /usr/share/applications
-		newins "${T}/${PN}.desktop" ${PN}.desktop
+		make_desktop_entry "${PN}-client" "Cube 2: Tesseract-Sauerbraten"
 	fi
 
-	# Install the server config files
-	insinto "${STATEDIR}"
+	insinto "${statedir}"
 	doins server-init.cfg
 
-	# Install the server executables
-	exeinto "${LIBEXECDIR}"
+	exeinto "${libexecdir}"
 	doexe src/tess_master
 
 	if use dedicated || use server ; then
 		doexe src/tess_server
 	fi
 
-	make_wrapper "${PN}-server" \
-		"${LIBEXECDIR}/tess_server -k${DATADIR} -q${STATEDIR}"
-	make_wrapper "${PN}-master" \
-		"${LIBEXECDIR}/tess_master ${STATEDIR}"
+	make_wrapper "${PN}-server" "${libexecdir}/tess_server -k${datadir} -q${statedir}"
+	make_wrapper "${PN}-master" "${libexecdir}/tess_master ${statedir}"
 
-	# Install the server init script
-	cp "${FILESDIR}"/tesseract-sauerbraten.init "${T}" || die
+	cp "${FILESDIR}"/tesseract-sauerbraten.init "${T}/${PN}.init" || die
 	sed -i \
-		-e "s:%SYSCONFDIR%:${STATEDIR}:g" \
-		-e "s:%LIBEXECDIR%:${LIBEXECDIR}:g" \
+		-e "s:%SYSCONFDIR%:${statedir}:g" \
+		-e "s:%LIBEXECDIR%:${libexecdir}:g" \
 		-e "s:%/var/lib/%:/var/run:g" \
-		"${T}"/${PN}.init || die
+		"${T}/${PN}.init" || die
+	newinitd "${T}/${PN}.init" ${PN}
 
-	newinitd "${T}"/${PN}.init ${PN}
-	cp "${FILESDIR}"/tesseract-sauerbraten.conf "${T}" || die
+	cp "${FILESDIR}"/tesseract-sauerbraten.conf "${T}/${PN}.conf" || die
 	sed -i \
-		-e "s:%SYSCONFDIR%:${STATEDIR}:g" \
-		-e "s:%LIBEXECDIR%:${LIBEXECDIR}:g" \
+		-e "s:%SYSCONFDIR%:${statedir}:g" \
+		-e "s:%LIBEXECDIR%:${libexecdir}:g" \
 		-e "s:%GAMES_USER_DED%:sauerbraten:g" \
 		-e "s:%GAMES_GROUP%:sauerbraten:g" \
-		"${T}"/${PN}.conf || die
-	newconfd "${T}"/${PN}.conf ${PN}
+		"${T}/${PN}.conf" || die
+	newconfd "${T}/${PN}.conf" ${PN}
 
 	dodoc src/*.txt docs/dev/*.txt
-
 	docinto html
 	dodoc -r README.html docs/*
 }
