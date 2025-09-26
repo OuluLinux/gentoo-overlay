@@ -22,6 +22,16 @@ S=${WORKDIR}/upp
 
 src_unpack() {
 	unpack ${A}
+	if [[ ! -d ${S} ]]; then
+		local f
+		mkdir -p "${S}" || die
+		shopt -s nullglob dotglob
+		for f in "${WORKDIR}"/*; do
+			[[ ${f} == ${S} ]] && continue
+			mv "${f}" "${S}/" || die
+		done
+		shopt -u nullglob dotglob
+	fi
 	cd ${S} || die
 	einfo "TODO: Custom CFLAGS do not work"
 #	echo "CFLAGS = gcc ${CFLAGS}" > uppsrc/Makefile.new
