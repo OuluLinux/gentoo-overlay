@@ -52,6 +52,8 @@ src_prepare() {
 	echo "$@"
 	"$@" || die
 
+	sed -i 's/\\<Swap(const Self& other)/Swap(Self& other)/' src/tmemory.h || die
+
 	cmake_src_prepare
 }
 
