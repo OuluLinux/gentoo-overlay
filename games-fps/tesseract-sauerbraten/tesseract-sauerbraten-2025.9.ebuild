@@ -3,12 +3,12 @@
 
 EAPI=8
 
-inherit desktop flag-o-matic toolchain-funcs wrapper xdg
+inherit flag-o-matic toolchain-funcs wrapper xdg
 
 DESCRIPTION="Tesseract-Sauerbraten is a FOSS game engine (Cube 2 + Tesseract) with freeware game data (Sauerbraten)"
 HOMEPAGE="http://sauerbraten.org/"
 SRC_URI="https://github.com/OuluLinux/Tesseract-Sauerbraten/archive/refs/tags/${PV//./_}.tar.gz"
-S="${WORKDIR}"/${PN}
+S="${WORKDIR}/Tesseract-Sauerbraten-${PV//./_}"
 
 LICENSE="ZLIB freedist"
 SLOT="0"
@@ -36,15 +36,15 @@ BDEPEND="virtual/pkgconfig"
 
 PATCHES=(
 	# Respect CXXFLAGS, LDFLAGS
-	"${FILESDIR}"/${PN}-2020.12.27-respect-FLAGS-don-t-strip-symbols.patch
+	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-respect-FLAGS-don-t-strip-symbols.patch
 
 	# Patch Makefile to use system enet instead of bundled
-	"${FILESDIR}"/${PN}-2020.12.27-unbundle-enet.patch
+	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-unbundle-enet.patch
 
 	# Don't use freetype-config, it's obsolete
-	"${FILESDIR}"/${PN}-2020.12.27-use-pkg-config-for-freetype2.patch
+	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-use-pkg-config-for-freetype2.patch
 	# More sensible ways of including SDL_mixer and SDL_image. Game doesn't build w/o this.
-	"${FILESDIR}"/${PN}-2020.12.29-includefix.patch
+	"${FILESDIR}"/tesseract-sauerbraten-2020.12.29-includefix.patch
 )
 
 src_prepare() {
@@ -80,14 +80,24 @@ src_install() {
 
 		# Install the client executable
 		exeinto "${LIBEXECDIR}"
-		doexe src/sauer_client
+		doexe src/tess_client
 
 		# Install the client wrapper
 		make_wrapper "${PN}-client" "${LIBEXECDIR}/tess_client -q\$HOME/.${PN} -r" "${DATADIR}"
 
 		# Create menu entry
 		newicon -s 256 data/cube.png ${PN}.png
-		make_desktop_entry "${PN}-client" "Cube 2: Tesseract-Sauerbraten"
+		cat <<-EOF > "${T}/${PN}.desktop" || die
+[Desktop Entry]
+Name=Cube 2: Tesseract-Sauerbraten
+Type=Application
+Comment=First-person shooter built on the Tesseract-enhanced Cube 2 engine
+Exec=${PN}-client
+Icon=${PN}
+Categories=Game;ActionGame;
+EOF
+		insinto /usr/share/applications
+		newins "${T}/${PN}.desktop" ${PN}.desktop
 	fi
 
 	# Install the server config files
@@ -103,12 +113,12 @@ src_install() {
 	fi
 
 	make_wrapper "${PN}-server" \
-		"${LIBEXECDIR}/sauer_server -k${DATADIR} -q${STATEDIR}"
+		"${LIBEXECDIR}/tess_server -k${DATADIR} -q${STATEDIR}"
 	make_wrapper "${PN}-master" \
-		"${LIBEXECDIR}/sauer_master ${STATEDIR}"
+		"${LIBEXECDIR}/tess_master ${STATEDIR}"
 
 	# Install the server init script
-	cp "${FILESDIR}"/${PN}.init "${T}" || die
+	cp "${FILESDIR}"/tesseract-sauerbraten.init "${T}" || die
 	sed -i \
 		-e "s:%SYSCONFDIR%:${STATEDIR}:g" \
 		-e "s:%LIBEXECDIR%:${LIBEXECDIR}:g" \
@@ -116,7 +126,7 @@ src_install() {
 		"${T}"/${PN}.init || die
 
 	newinitd "${T}"/${PN}.init ${PN}
-	cp "${FILESDIR}"/${PN}.conf "${T}" || die
+	cp "${FILESDIR}"/tesseract-sauerbraten.conf "${T}" || die
 	sed -i \
 		-e "s:%SYSCONFDIR%:${STATEDIR}:g" \
 		-e "s:%LIBEXECDIR%:${LIBEXECDIR}:g" \
@@ -134,10 +144,6 @@ src_install() {
 pkg_postinst() {
 	xdg_pkg_postinst
 
-	elog "If you plan to use map editor feature copy all map data from ${DATADIR}"
+	elog "If you plan to use map editor feature copy all map data from /usr/share/${PN}"
 	elog "to corresponding folder in your HOME/.${PN}"
 }
-
-
-
-https://github.com/OuluLinux/Tesseract-Sauerbraten/archive/refs/tags/2025.9.tar.gz

@@ -3,12 +3,12 @@
 
 EAPI=8
 
-inherit desktop flag-o-matic toolchain-funcs wrapper xdg
+inherit flag-o-matic toolchain-funcs wrapper xdg
 
 DESCRIPTION="Sauerbraten is a FOSS game engine (Cube 2) with freeware game data (Sauerbraten)"
 HOMEPAGE="http://sauerbraten.org/"
 SRC_URI="https://downloads.sourceforge.net/sauerbraten/sauerbraten/2020_11_29/sauerbraten_${PV//./_}_linux.tar.bz2"
-S="${WORKDIR}"/${PN}
+S="${WORKDIR}/sauerbraten"
 
 LICENSE="ZLIB freedist"
 SLOT="0"
@@ -36,15 +36,15 @@ BDEPEND="virtual/pkgconfig"
 
 PATCHES=(
 	# Respect CXXFLAGS, LDFLAGS
-	"${FILESDIR}"/${PN}-2020.12.27-respect-FLAGS-don-t-strip-symbols.patch
+	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-respect-FLAGS-don-t-strip-symbols.patch
 
 	# Patch Makefile to use system enet instead of bundled
-	"${FILESDIR}"/${PN}-2020.12.27-unbundle-enet.patch
+	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-unbundle-enet.patch
 
 	# Don't use freetype-config, it's obsolete
-	"${FILESDIR}"/${PN}-2020.12.27-use-pkg-config-for-freetype2.patch
+	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-use-pkg-config-for-freetype2.patch
 	# More sensible ways of including SDL_mixer and SDL_image. Game doesn't build w/o this.
-	"${FILESDIR}"/${PN}-2020.12.29-includefix.patch
+	"${FILESDIR}"/tesseract-sauerbraten-2020.12.29-includefix.patch
 )
 
 src_prepare() {
@@ -87,7 +87,17 @@ src_install() {
 
 		# Create menu entry
 		newicon -s 256 data/cube.png ${PN}.png
-		make_desktop_entry "${PN}-client" "Cube 2: Sauerbraten"
+		cat <<-EOF > "${T}/${PN}.desktop" || die
+[Desktop Entry]
+Name=Cube 2: Sauerbraten
+Type=Application
+Comment=First-person shooter built on the Cube 2 / Tesseract engine
+Exec=${PN}-client
+Icon=${PN}
+Categories=Game;ActionGame;
+EOF
+		insinto /usr/share/applications
+		newins "${T}/${PN}.desktop" ${PN}.desktop
 	fi
 
 	# Install the server config files
@@ -108,7 +118,7 @@ src_install() {
 		"${LIBEXECDIR}/tess_master ${STATEDIR}"
 
 	# Install the server init script
-	cp "${FILESDIR}"/${PN}.init "${T}" || die
+	cp "${FILESDIR}"/tesseract-sauerbraten.init "${T}" || die
 	sed -i \
 		-e "s:%SYSCONFDIR%:${STATEDIR}:g" \
 		-e "s:%LIBEXECDIR%:${LIBEXECDIR}:g" \
@@ -116,7 +126,7 @@ src_install() {
 		"${T}"/${PN}.init || die
 
 	newinitd "${T}"/${PN}.init ${PN}
-	cp "${FILESDIR}"/${PN}.conf "${T}" || die
+	cp "${FILESDIR}"/tesseract-sauerbraten.conf "${T}" || die
 	sed -i \
 		-e "s:%SYSCONFDIR%:${STATEDIR}:g" \
 		-e "s:%LIBEXECDIR%:${LIBEXECDIR}:g" \
@@ -134,6 +144,6 @@ src_install() {
 pkg_postinst() {
 	xdg_pkg_postinst
 
-	elog "If you plan to use map editor feature copy all map data from ${DATADIR}"
+	elog "If you plan to use map editor feature copy all map data from /usr/share/${PN}"
 	elog "to corresponding folder in your HOME/.${PN}"
 }
