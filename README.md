@@ -12,8 +12,8 @@ The OuluLinux Gentoo Overlay repo, contains the following:
 2. Add the overlay's metadata to the created file
 
 ```
-[oululinux-overlay]
-location = /var/db/repos/oululinux-overlay
+[oululinux]
+location = /var/db/repos/oululinux
 sync-type = git
 sync-uri = https://github.com/oululinux/gentoo-overlay.git
 ```
