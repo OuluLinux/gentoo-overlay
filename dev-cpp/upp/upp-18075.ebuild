@@ -18,11 +18,11 @@ RDEPEND="sys-devel/gcc
 
 DEPEND="${RDEPEND}"
 
-S=${WORKDIR}/upp-posix-${PV}
+S=${WORKDIR}/upp
 
 src_unpack() {
 	unpack ${A}
-	cd ${S}
+	cd ${S} || die
 	einfo "TODO: Custom CFLAGS do not work"
 #	echo "CFLAGS = gcc ${CFLAGS}" > uppsrc/Makefile.new
 #	echo "CPPFLAGS = g++ ${CXXFLAGS}" >> uppsrc/Makefile.new
