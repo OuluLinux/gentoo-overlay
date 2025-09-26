@@ -76,7 +76,7 @@ src_install() {
 
 		make_wrapper "${PN}-client" "${libexecdir}/tess_client -q\$HOME/.${PN} -r" "${datadir}"
 
-		newicon -s 256 data/cube.png ${PN}.png
+		newicon -s 256 packages/interface/cube.png ${PN}.png
 		make_desktop_entry "${PN}-client" "Cube 2: Tesseract-Sauerbraten"
 	fi
 
