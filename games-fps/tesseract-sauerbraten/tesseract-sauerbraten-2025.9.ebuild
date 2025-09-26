@@ -7,8 +7,8 @@ inherit desktop flag-o-matic toolchain-funcs wrapper xdg
 
 DESCRIPTION="Tesseract-Sauerbraten is a FOSS game engine (Cube 2 + Tesseract) with freeware game data (Sauerbraten)"
 HOMEPAGE="http://sauerbraten.org/"
-SRC_URI="https://github.com/OuluLinux/Tesseract-Sauerbraten/archive/refs/tags/${PV//./_}.tar.gz"
-S="${WORKDIR}/Tesseract-Sauerbraten-${PV//./_}"
+SRC_URI="https://github.com/OuluLinux/Tesseract-Sauerbraten/archive/refs/tags/${PV}.tar.gz -> ${P}.tar.gz"
+S="${WORKDIR}/Tesseract-Sauerbraten-${PV}"
 
 LICENSE="ZLIB freedist"
 SLOT="0"
