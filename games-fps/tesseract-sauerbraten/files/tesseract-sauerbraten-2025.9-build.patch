@@ -1,0 +1,135 @@
+diff --git a/src/Makefile b/src/Makefile
+--- a/src/Makefile
++++ b/src/Makefile
+@@ -1,4 +1,3 @@
+-CXXFLAGS= -O3 -fomit-frame-pointer -ffast-math
+ override CXXFLAGS+= -Wall -fsigned-char -fno-exceptions -fno-rtti
+ 
+ PLATFORM= $(shell uname -s | tr '[:lower:]' '[:upper:]')
+@@ -10,14 +9,8 @@
+     endif
+ endif
+ 
+-INCLUDES= -Ishared -Iengine -Igame -Ienet/include
+-
++INCLUDES= -Ishared -Iengine -Igame
+ STRIP=
+-ifeq (,$(findstring -g,$(CXXFLAGS)))
+-ifeq (,$(findstring -pg,$(CXXFLAGS)))
+-  STRIP=strip
+-endif
+-endif
+ 
+ MV=mv
+ 
+@@ -59,10 +52,10 @@
+ CLIENT_INCLUDES= $(INCLUDES) -Iinclude
+ CLIENT_LIBS= -F../sauerbraten.app/Contents/Frameworks/ -framework SDL2 -framework SDL2_image
+ CLIENT_LIBS+= -framework SDL2_mixer -framework CoreAudio -framework AudioToolbox
+-CLIENT_LIBS+= -framework AudioUnit -framework OpenGL -framework Cocoa -lz -Lenet -lenet
++CLIENT_LIBS+= -framework AudioUnit -framework OpenGL -framework Cocoa -lz -lenet
+ else
+-CLIENT_INCLUDES= $(INCLUDES) -I/usr/X11R6/include `sdl2-config --cflags`
+-CLIENT_LIBS= -Lenet -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lz -lGL
++CLIENT_INCLUDES= $(INCLUDES) `sdl2-config --cflags`
++CLIENT_LIBS= -lenet -L/usr/X11R6/lib -lX11 `sdl2-config --libs` -lSDL2_image -lSDL2_mixer -lz -lGL
+ endif
+ endif
+ ifeq ($(PLATFORM),LINUX)
+@@ -136,7 +129,7 @@
+ SERVER_LIBS= -mwindows $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
+ MASTER_LIBS= $(STD_LIBS) -L$(WINBIN) -L$(WINLIB) -lzlib1 -lenet -lws2_32 -lwinmm
+ else
+-SERVER_LIBS= -Lenet -lenet -lz
++SERVER_LIBS= -lenet -lz
+ MASTER_LIBS= $(SERVER_LIBS)
+ endif
+ 
+@@ -173,7 +166,7 @@
+ 
+ $(filter-out shared/%,$(CLIENT_PCH)): $(filter shared/%,$(CLIENT_PCH))
+ $(CLIENT_PCH): %.h.gch: %.h
+-	$(CXX) $(CXXFLAGS) -x c++-header -o $@.tmp $<
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++-header -o $@.tmp $<
+ 	$(MV) $@.tmp $@
+ 
+ $(CLIENT_OBJS): CXXFLAGS += $(CLIENT_INCLUDES)
+@@ -183,7 +176,7 @@
+ 
+ $(filter-out standalone/shared/%,$(SERVER_PCH)): $(filter standalone/shared/%,$(SERVER_PCH))
+ $(SERVER_PCH): standalone/%.h.gch: %.h
+-	$(CXX) $(CXXFLAGS) -x c++-header -o $@.tmp $<
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -x c++-header -o $@.tmp $<
+ 	$(MV) $@.tmp $@
+ 
+ $(SERVER_MASTER_OBJS): CXXFLAGS += $(SERVER_INCLUDES)
+@@ -192,39 +185,39 @@
+ $(filter standalone/game/%,$(SERVER_MASTER_OBJS)): $(filter standalone/game/%,$(SERVER_PCH))
+ 
+ $(SERVER_MASTER_OBJS): standalone/%.o: %.cpp
+-	$(CXX) $(CXXFLAGS) -c -o $@ $<
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $<
+ 
+ ifneq (,$(findstring MINGW,$(PLATFORM)))
+ client: $(CLIENT_OBJS)
+ 	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff 
+-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/tesseract.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $(WINBIN)/tesseract.exe vcpp/mingw.res $(CLIENT_OBJS) $(CLIENT_LIBS)
+ 
+ server: $(SERVER_OBJS)
+ 	$(WINDRES) -I vcpp -i vcpp/mingw.rc -J rc -o vcpp/mingw.res -O coff
+-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/tess_server.exe vcpp/mingw.res $(SERVER_OBJS) $(SERVER_LIBS)
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $(WINBIN)/tess_server.exe vcpp/mingw.res $(SERVER_OBJS) $(SERVER_LIBS)
+ 
+ master: $(MASTER_OBJS)
+-	$(CXX) $(CXXFLAGS) -o $(WINBIN)/tess_master.exe $(MASTER_OBJS) $(MASTER_LIBS)
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o $(WINBIN)/tess_master.exe $(MASTER_OBJS) $(MASTER_LIBS)
+ 
+ install: all
+ else
+-client:	libenet $(CLIENT_OBJS)
+-	$(CXX) $(CXXFLAGS) -o tess_client $(CLIENT_OBJS) $(CLIENT_LIBS)
++client:	$(CLIENT_OBJS)
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o tess_client $(CLIENT_OBJS) $(CLIENT_LIBS)
+ ifneq (,$(findstring DARWIN,$(PLATFORM)))
+ 	install_name_tool -add_rpath @executable_path/../Frameworks tess_client
+ endif
+ 
+-server:	libenet $(SERVER_OBJS)
+-	$(CXX) $(CXXFLAGS) -o tess_server $(SERVER_OBJS) $(SERVER_LIBS)  
++server:	$(SERVER_OBJS)
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o tess_server $(SERVER_OBJS) $(SERVER_LIBS)
+ 	
+-master: libenet $(MASTER_OBJS)
+-	$(CXX) $(CXXFLAGS) -o tess_master $(MASTER_OBJS) $(MASTER_LIBS)  
++master: $(MASTER_OBJS)
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o tess_master $(MASTER_OBJS) $(MASTER_LIBS)
+ 
+ shared/tessfont.o: shared/tessfont.c
+-	$(CXX) $(CXXFLAGS) -c -o $@ $< `freetype-config --cflags`
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c -o $@ $< `pkg-config --cflags freetype2`
+ 
+ tessfont: shared/tessfont.o
+-	$(CXX) $(CXXFLAGS) -o tessfont shared/tessfont.o `freetype-config --libs` -lz
++	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(LDFLAGS) -o tessfont shared/tessfont.o `pkg-config --libs freetype2` -lz
+ 
+ ifneq (,$(findstring DARWIN,$(PLATFORM)))
+ install: client
+@@ -233,17 +226,9 @@
+ install: all
+ 	cp -f tess_client	../bin_unix/$(PLATFORM_PREFIX)_client
+ 	cp -f tess_server	../bin_unix/$(PLATFORM_PREFIX)_server
+-ifneq (,$(STRIP))
+-	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_client
+-	$(STRIP) ../bin_unix/$(PLATFORM_PREFIX)_server
+-endif
+ endif
+ endif
+ 
+-enet/libenet.a:
+-	$(MAKE) -C enet
+-libenet: enet/libenet.a
+-
+ depend:
+ 	makedepend -Y -Ishared -Iengine -Igame $(CLIENT_OBJS:.o=.cpp)
+ 	makedepend -a -o.h.gch -Y -Ishared -Iengine -Igame $(CLIENT_PCH:.h.gch=.h)

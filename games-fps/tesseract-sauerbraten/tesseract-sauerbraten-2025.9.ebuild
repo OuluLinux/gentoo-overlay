@@ -35,14 +35,8 @@ RDEPEND="
 BDEPEND="virtual/pkgconfig"
 
 PATCHES=(
-	# Respect CXXFLAGS, LDFLAGS
-	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-respect-FLAGS-don-t-strip-symbols.patch
-
-	# Patch Makefile to use system enet instead of bundled
-	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-unbundle-enet.patch
-
-	# Don't use freetype-config, it's obsolete
-	"${FILESDIR}"/tesseract-sauerbraten-2020.12.27-use-pkg-config-for-freetype2.patch
+	# Respect user toolchain flags, use system enet, modern freetype detection
+	"${FILESDIR}"/tesseract-sauerbraten-2025.9-build.patch
 
 	# More sensible SDL include handling
 	"${FILESDIR}"/tesseract-sauerbraten-2020.12.29-includefix.patch
@@ -53,7 +47,9 @@ src_prepare() {
 
 	default
 
-	sed -i -e 's:docs/::' README.html || die
+	if [[ -f README.html ]]; then
+		sed -i -e 's:docs/::' README.html || die
+	fi
 }
 
 src_compile() {
@@ -73,7 +69,7 @@ src_install() {
 
 	if ! use dedicated ; then
 		insinto "${datadir}"
-		doins -r data packages
+		doins -r config packages
 
 		exeinto "${libexecdir}"
 		doexe src/tess_client
@@ -85,7 +81,9 @@ src_install() {
 	fi
 
 	insinto "${statedir}"
-	doins server-init.cfg
+	if [[ -f config/server-init.cfg ]]; then
+		doins config/server-init.cfg
+	fi
 
 	exeinto "${libexecdir}"
 	doexe src/tess_master
@@ -114,9 +112,28 @@ src_install() {
 		"${T}/${PN}.conf" || die
 	newconfd "${T}/${PN}.conf" ${PN}
 
-	dodoc src/*.txt docs/dev/*.txt
-	docinto html
-	dodoc -r README.html docs/*
+	local doc_files=()
+
+	if [[ -f README.md ]]; then
+		doc_files+=(README.md)
+	fi
+
+	if compgen -G 'src/readme_*.txt' > /dev/null ; then
+		doc_files+=(src/readme_*.txt)
+	fi
+
+	if [[ -f README.html ]]; then
+		doc_files+=(README.html)
+	fi
+
+	if [[ ${#doc_files[@]} -gt 0 ]]; then
+		dodoc "${doc_files[@]}"
+	fi
+
+	if [[ -d docs ]]; then
+		docinto html
+		dodoc -r docs/*
+	fi
 }
 
 pkg_postinst() {
