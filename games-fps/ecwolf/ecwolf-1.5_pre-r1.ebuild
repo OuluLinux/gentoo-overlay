@@ -36,7 +36,7 @@ DEPEND="${RDEPEND}"
 src_prepare() {
 	eapply "${FILESDIR}/${PN}-gentoo.patch"
 	default
-	sed -i 's/\\<Swap(const Self& other)/Swap(Self& other)/' src/tmemory.h || die
+	sed -i 's/Swap(const Self &/Swap(Self &/' src/tmemory.h || die
 	cmake_src_prepare
 }
 
