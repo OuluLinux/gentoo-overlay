@@ -1,2 +1,5 @@
 distfiles/**
 tmp/**
+.tmp/**
+.bin/**
+
