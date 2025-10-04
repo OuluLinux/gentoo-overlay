@@ -3,14 +3,17 @@
 
 EAPI=8
 
+inherit git-r3
+
 DESCRIPTION="Ultimate++ Framework"
 HOMEPAGE="https://www.ultimatepp.org/"
-# Live snapshot from GitHub master; always changing
-SRC_URI="https://github.com/ultimatepp/ultimatepp/archive/refs/heads/master.zip -> ${P}.zip"
+# Live ebuild: clone suoraan upstream-reposta
+EGIT_REPO_URI="https://github.com/ultimatepp/ultimatepp.git"
+EGIT_BRANCH="master"
 
 LICENSE="BSD"
 SLOT="0"
-# Live ebuild: no KEYWORDS
+# Live: ei KEYWORDS-riviä
 PROPERTIES="live"
 RESTRICT="mirror"
 
@@ -23,21 +26,15 @@ RDEPEND="sys-devel/gcc
 	 x11-libs/pango"
 
 DEPEND="${RDEPEND}"
-BDEPEND="app-arch/unzip"
+# git-r3 hoitaa BDEPEND=dev-vcs/git
 
+# git-r3 check outtaa oletuksena ${WORKDIR}/${P}
 S=${WORKDIR}/${P}
 
-src_unpack() {
-	# Unpack the GitHub master.zip and rename to ${P} for consistency
-	unpack "${A}" || die
-	rm -rf "${S}" || die
-	mv "${WORKDIR}/ultimatepp-master" "${S}" || die
-	einfo "TODO: Custom CFLAGS do not work"
-	# The upstream makefiles tend to override flags; leaving hints here:
-	# echo "CFLAGS = gcc ${CFLAGS}" > uppsrc/Makefile.new
-	# echo "CPPFLAGS = g++ ${CXXFLAGS}" >> uppsrc/Makefile.new
-	# sed -e 's/^CC = .*//' -e 's/^CFLAGS = .*//' -e 's/^CPPFLAGS = .*//' uppsrc/Makefile >> uppsrc/Makefile.new
-	# mv -f uppsrc/Makefile.new uppsrc/Makefile
+src_prepare() {
+	default  # eapply_user jne.
+	# Upstreamin makefilet saattavat peittää CFLAGS/CXXFLAGS – jätetään koukku tarvittaessa:
+	# sed -i -e 's/^CC = .*//; s/^CFLAGS = .*//; s/^CPPFLAGS = .*//' uppsrc/Makefile || die
 }
 
 src_compile() {
