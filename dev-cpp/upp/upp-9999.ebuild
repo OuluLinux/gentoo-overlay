@@ -4,12 +4,16 @@
 EAPI=8
 
 DESCRIPTION="Ultimate++ Framework"
-HOMEPAGE="http://www.ultimatepp.org/"
-SRC_URI="https://www.ultimatepp.org/downloads/upp-posix-${PV}.tar.xz"
+HOMEPAGE="https://www.ultimatepp.org/"
+# Live snapshot from GitHub master; always changing
+SRC_URI="https://github.com/ultimatepp/ultimatepp/archive/refs/heads/master.zip -> ${P}.zip"
 
 LICENSE="BSD"
 SLOT="0"
-KEYWORDS="~amd64 ~x86 ~arm64"
+# Live ebuild: no KEYWORDS
+PROPERTIES="live"
+RESTRICT="mirror"
+
 RDEPEND="sys-devel/gcc
 	 dev-libs/glib
 	 x11-libs/gtk+
@@ -19,21 +23,21 @@ RDEPEND="sys-devel/gcc
 	 x11-libs/pango"
 
 DEPEND="${RDEPEND}"
+BDEPEND="app-arch/unzip"
 
 S=${WORKDIR}/${P}
 
 src_unpack() {
+	# Unpack the GitHub master.zip and rename to ${P} for consistency
+	unpack "${A}" || die
 	rm -rf "${S}" || die
-	mkdir -p "${S}" || die
-	tar -xf "${DISTDIR}/upp-posix-${PV}.tar.xz" --strip-components=1 -C "${S}" || die
+	mv "${WORKDIR}/ultimatepp-master" "${S}" || die
 	einfo "TODO: Custom CFLAGS do not work"
-#	echo "CFLAGS = gcc ${CFLAGS}" > uppsrc/Makefile.new
-#	echo "CPPFLAGS = g++ ${CXXFLAGS}" >> uppsrc/Makefile.new
-#	cat uppsrc/Makefile | sed -e "s/^CC = .*//" \
-#	    | sed -e "s/^CFLAGS = .*//" | sed -e "s/^CPPFLAGS = .*//" \
-#	    >> uppsrc/Makefile.new
-#	rm uppsrc/Makefile
-#	mv uppsrc/Makefile.new uppsrc/Makefile
+	# The upstream makefiles tend to override flags; leaving hints here:
+	# echo "CFLAGS = gcc ${CFLAGS}" > uppsrc/Makefile.new
+	# echo "CPPFLAGS = g++ ${CXXFLAGS}" >> uppsrc/Makefile.new
+	# sed -e 's/^CC = .*//' -e 's/^CFLAGS = .*//' -e 's/^CPPFLAGS = .*//' uppsrc/Makefile >> uppsrc/Makefile.new
+	# mv -f uppsrc/Makefile.new uppsrc/Makefile
 }
 
 src_compile() {
@@ -90,3 +94,4 @@ src_install() {
 	elog "to your homedirectory. This is the normal procedure, the shared files will never"
 	elog "be used directly."
 }
+
