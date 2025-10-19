@@ -1,0 +1,20 @@
+--- a/src/Compilers/Core/MSBuildTask/Csc.cs
++++ b/src/Compilers/Core/MSBuildTask/Csc.cs
+@@ -201,6 +201,17 @@
+         }
+ 
+         /// <summary>
++        /// Return the name of the tool to execute.
++        /// </summary>
++        public override string ToolExe
++        {
++            get
++            {
++                return ToolNameWithoutExtension;
++            }
++        }
++
++        /// <summary>
+         /// Fills the provided CommandLineBuilderExtension with those switches and other information that can go into a response file.
+         /// </summary>
+         protected internal override void AddResponseFileCommands(CommandLineBuilderExtension commandLine)
