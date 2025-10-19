@@ -22,7 +22,7 @@ IUSE="$(dotnet_expand ${USE_DOTNET}) $(msbuild_expand ${USE_MSBUILD}) +msbuild +
 NAME="roslyn"
 HOMEPAGE="https://github.com/dotnet/${NAME}"
 EGIT_COMMIT="52021b4b3a9dcfd7b955102adb2901524a62a371"
-SRC_URI="${HOMEPAGE}/archive/${EGIT_COMMIT}.tar.gz -> ${NAME}-${PV}.tar.gz"
+SRC_URI="${HOMEPAGE}/archive/${EGIT_COMMIT}.tar.gz -> ${NAME}-${EGIT_COMMIT}.tar.gz"
 
 S="${WORKDIR}/roslyn-${PV}"
 
