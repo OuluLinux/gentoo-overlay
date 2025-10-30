@@ -33,8 +33,11 @@ S=${WORKDIR}/${P}
 
 src_prepare() {
 	default  # eapply_user jne.
-	# Upstreamin makefilet saattavat peittää CFLAGS/CXXFLAGS – jätetään koukku tarvittaessa:
-	# sed -i -e 's/^CC = .*//; s/^CFLAGS = .*//; s/^CPPFLAGS = .*//' uppsrc/Makefile || die
+	# Fix Makefile to respect system CFLAGS/CXXFLAGS
+	sed -i \
+		-e "s:CFLAGS = -O3 -ffunction-sections -fdata-sections :CFLAGS += ${CFLAGS}:" \
+		-e "s:CXXFLAGS = -O3 -ffunction-sections -fdata-sections  -std=c++17:CXXFLAGS += ${CXXFLAGS} -std=c++17:" \
+		"${S}/Makefile" || die "Failed to modify Makefile"
 }
 
 src_compile() {

@@ -22,18 +22,19 @@ DEPEND="${RDEPEND}"
 
 S=${WORKDIR}/${P}
 
+src_prepare() {
+	default
+	# Fix Makefile to respect system CFLAGS/CXXFLAGS
+	sed -i \
+		-e "s:CFLAGS = -O3 -ffunction-sections -fdata-sections :CFLAGS += ${CFLAGS}:" \
+		-e "s:CXXFLAGS = -O3 -ffunction-sections -fdata-sections  -std=c++17:CXXFLAGS += ${CXXFLAGS} -std=c++17:" \
+		"${S}/Makefile" || die "Failed to modify Makefile"
+}
+
 src_unpack() {
 	rm -rf "${S}" || die
 	mkdir -p "${S}" || die
 	tar -xf "${DISTDIR}/upp-posix-${PV}.tar.xz" --strip-components=1 -C "${S}" || die
-	einfo "TODO: Custom CFLAGS do not work"
-#	echo "CFLAGS = gcc ${CFLAGS}" > uppsrc/Makefile.new
-#	echo "CPPFLAGS = g++ ${CXXFLAGS}" >> uppsrc/Makefile.new
-#	cat uppsrc/Makefile | sed -e "s/^CC = .*//" \
-#	    | sed -e "s/^CFLAGS = .*//" | sed -e "s/^CPPFLAGS = .*//" \
-#	    >> uppsrc/Makefile.new
-#	rm uppsrc/Makefile
-#	mv uppsrc/Makefile.new uppsrc/Makefile
 }
 
 src_compile() {

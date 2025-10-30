@@ -20,17 +20,18 @@ DEPEND="${RDEPEND}"
 
 S=${WORKDIR}/upp-x11-src-${PV}
 
+src_prepare() {
+	default
+	# Fix Makefile to respect system CFLAGS/CXXFLAGS
+	sed -i \
+		-e "s:CFLAGS = -O3 -ffunction-sections -fdata-sections :CFLAGS += ${CFLAGS}:" \
+		-e "s:CXXFLAGS = -O3 -ffunction-sections -fdata-sections  -std=c++17:CXXFLAGS += ${CXXFLAGS} -std=c++17:" \
+		"${S}/Makefile" || die "Failed to modify Makefile"
+}
+
 src_unpack() {
 	unpack ${A}
 	cd ${S}
-	einfo "TODO: Custom CFLAGS do not work"
-#	echo "CFLAGS = gcc ${CFLAGS}" > uppsrc/Makefile.new
-#	echo "CPPFLAGS = g++ ${CXXFLAGS}" >> uppsrc/Makefile.new
-#	cat uppsrc/Makefile | sed -e "s/^CC = .*//" \
-#	    | sed -e "s/^CFLAGS = .*//" | sed -e "s/^CPPFLAGS = .*//" \
-#	    >> uppsrc/Makefile.new
-#	rm uppsrc/Makefile
-#	mv uppsrc/Makefile.new uppsrc/Makefile
 }
 
 src_compile() {
