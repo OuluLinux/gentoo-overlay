@@ -1,0 +1,5 @@
+--- config/project.mak
++++ config/project.mak
+@@ -113,1 +113,1 @@
+-FTLIBDIR = $(FESTIVAL_HOME)/lib 
++FTLIBDIR = /usr/share/festival/lib 

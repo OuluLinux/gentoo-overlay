@@ -41,9 +41,10 @@ src_unpack() {
 	done
 }
 
-src_install() {
+	src_install() {
 	dodir /usr/share/festival
-	cp -a "${WORKDIR}/usr/share/festival/voices" "${D}/usr/share/festival/"
+	dodir /usr/share/festival/lib
+	cp -a "${WORKDIR}/usr/share/festival/voices" "${D}/usr/share/festival/lib/"
 
 	dodir /usr/share/doc/festvox-suopuhe-common
 	dodir /usr/share/doc/festvox-suopuhe-mv

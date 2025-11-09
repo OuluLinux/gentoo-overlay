@@ -58,6 +58,11 @@ src_unpack() {
 src_prepare() {
 	default
 
+	(
+		cd "${S}" || die
+		patch -p0 < "${FILESDIR}/festival-libdir.patch"
+	)
+
 	local speech_tools_src="${WORKDIR}/speech_tools"
 	local inst_tmpl_dir="${speech_tools_src}/base_class/inst_tmpl"
 	local force_file="${inst_tmpl_dir}/force_instantiations.cc"
