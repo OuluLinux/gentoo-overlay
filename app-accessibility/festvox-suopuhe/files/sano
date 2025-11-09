@@ -1,0 +1,12 @@
+#!/bin/sh
+# Convert UTF-8 arguments to ISO-8859-1 for Festival and speak them.
+set -euo pipefail
+
+tmpfile=$(mktemp /tmp/sano-XXXXXX)
+trap 'rm -f "$tmpfile"' EXIT
+
+for arg in "$@"; do
+  printf '%s ' "$arg"
+done > "$tmpfile"
+
+iconv -f UTF-8 -t ISO-8859-1 "$tmpfile" | festival --tts >/dev/null 2>&1

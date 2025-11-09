@@ -1,0 +1,17 @@
+#!/bin/sh
+# Write UTF-8 arguments converted to ISO-8859-1 into the supplied file.
+set -euo pipefail
+
+if [ $# -lt 2 ]; then
+  echo "Usage: $0 output-file text..." >&2
+  exit 1
+fi
+
+outfile=$1
+shift
+
+tmpfile=$(mktemp /tmp/sano-tiedostoon-XXXXXX)
+trap 'rm -f "$tmpfile"' EXIT
+
+printf '%s ' "$@" > "$tmpfile"
+iconv -f UTF-8 -t ISO-8859-1 "$tmpfile" > "$outfile"
