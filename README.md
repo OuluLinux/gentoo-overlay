@@ -30,6 +30,17 @@ sync-uri = https://github.com/oululinux/gentoo-overlay.git
 emaint sync -r oululinux
 ```
 
+If you already have `/home/sblo/gentoo-overlay` checked out locally and prefer to use it directly rather than syncing, point Portage at that path and tell it not to sync. For example, in `/etc/portage/repos.conf/oululinux.conf` use:
+
+```
+[oululinux]
+location = /home/sblo/gentoo-overlay
+sync-type = none
+```
+
+
+Portage 3.0 and later no longer accept `sync-type = none`. To keep using the local checkout without syncing, either add the overlay path to `PORTDIR_OVERLAY` (as above) or configure the repo with a supported sync type such as `git` (and a matching `sync-uri`, e.g. `https://github.com/oululinux/gentoo-overlay.git`).<div></div>
+
 4. Install a package, for example:
 
 ```bash

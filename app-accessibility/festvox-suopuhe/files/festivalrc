@@ -1,0 +1,7 @@
+;;; Locale-specific initialization for SuoPuhe voices.
+;; Ensure we load the original ~/.festivalrc if it exists before
+;; applying the overlay configuration.
+(let ((user-home (getenv "FESTVOX_SUOPUHE_USER_HOME")))
+  (if (and user-home (probe_file (path-append user-home ".festivalrc")))
+      (load (path-append user-home ".festivalrc"))))
+(load "/usr/share/festvox-suopuhe/festival.scm")
