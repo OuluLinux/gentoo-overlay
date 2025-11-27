@@ -14,6 +14,30 @@ Packages currently available in this overlay:
 
 ## Installation
 
+### Primary Method: Using eselect repository
+
+1. Add the repository using eselect:
+
+```bash
+eselect repository add oululinux git https://github.com/oululinux/gentoo-overlay.git
+```
+
+2. Sync the new overlay:
+
+```bash
+emaint sync -r oululinux
+```
+
+3. Install a package, for example:
+
+```bash
+emerge --ask dev-cpp/upp
+```
+
+### Alternative Method: Manual Configuration
+
+If you prefer to manually configure the repository, follow these steps:
+
 1. Create the overlay definition `/etc/portage/repos.conf/oululinux.conf` (or any file under `repos.conf`).
 2. Add the following repository configuration:
 
@@ -38,11 +62,4 @@ location = /home/sblo/gentoo-overlay
 sync-type = none
 ```
 
-
-Portage 3.0 and later no longer accept `sync-type = none`. To keep using the local checkout without syncing, either add the overlay path to `PORTDIR_OVERLAY` (as above) or configure the repo with a supported sync type such as `git` (and a matching `sync-uri`, e.g. `https://github.com/oululinux/gentoo-overlay.git`).<div></div>
-
-4. Install a package, for example:
-
-```bash
-emerge --ask dev-cpp/upp
-```
+Portage 3.0 and later no longer accept `sync-type = none`. To keep using the local checkout without syncing, either add the overlay path to `PORTDIR_OVERLAY` or configure the repo with a supported sync type such as `git` (and a matching `sync-uri`, e.g. `https://github.com/oululinux/gentoo-overlay.git`).
