@@ -41,6 +41,8 @@ BDEPEND="app-shells/tcsh
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-8.3.232-libdir.patch
+	"${FILESDIR}"/${PN}-fix-bool-typedef.patch
+	"${FILESDIR}"/${PN}-fix-CIFGetOutputScale.patch
 )
 
 DOCS=( README.md README.Tcl TODO )
@@ -66,6 +68,7 @@ src_configure() {
 	# Short-circuit top-level configure script to retain CFLAGS
 	# Fix tcl/tk detection, bug #447868
 	# Also add flags to handle the function declaration issues
+	append-cppflags -Wno-error=implicit-function-declaration -Wno-implicit-function-declaration
 	append-cflags -Wno-error=implicit-function-declaration -Wno-implicit-function-declaration
 
 	cd scripts || die
