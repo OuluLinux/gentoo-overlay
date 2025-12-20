@@ -41,7 +41,6 @@ BDEPEND="app-shells/tcsh
 
 PATCHES=(
 	"${FILESDIR}"/${PN}-8.3.232-libdir.patch
-	"${FILESDIR}"/${PN}-fix-bool-typedef.patch
 	"${FILESDIR}"/${PN}-fix-CIFGetOutputScale.patch
 )
 
