@@ -65,9 +65,9 @@ src_prepare() {
 src_configure() {
 	# Short-circuit top-level configure script to retain CFLAGS
 	# Fix tcl/tk detection, bug #447868
-	# Also add flags to handle the function declaration issues
-	append-cppflags -Wno-error=implicit-function-declaration -Wno-implicit-function-declaration
-	append-cflags -Wno-error=implicit-function-declaration -Wno-implicit-function-declaration
+	# Also adjust flags to handle the function declaration issues in legacy code
+	export CFLAGS="${CFLAGS} -Wno-error=implicit-function-declaration -Wno-implicit-function-declaration"
+	export CPPFLAGS="${CPPFLAGS} -Wno-error=implicit-function-declaration -Wno-implicit-function-declaration"
 
 	cd scripts || die
 	econf \
