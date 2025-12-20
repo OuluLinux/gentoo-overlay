@@ -1,0 +1,78 @@
+Fix function declarations to provide proper prototypes
+
+This patch updates function declarations in header files to have proper 
+prototypes instead of empty parameter lists, which helps with modern 
+compiler requirements and the -Werror=implicit-function-declaration flag.
+
+--- a/database/database.h.in
++++ b/database/database.h.in
+@@ -723,10 +723,10 @@
+     /* Painting/erasing */
+-extern void DBPaint();
+-extern void DBErase();
+-extern int  DBSrPaintArea();
++extern void DBPaint(CellDef *def, Rect *area, TileType type, PaintUndoInfo *undoInfo);
++extern void DBErase(CellDef *def, Rect *area, TileType type, PaintUndoInfo *undoInfo);
++extern int  DBSrPaintArea(Tile *hintTile, Plane *plane, Rect *rect, TileTypeBitMask *mask, int (*func)(), ClientData arg);
+ extern int  DBPaintPlane0();
+ extern int  DBPaintPlaneActive();
+ extern int  DBPaintPlaneWrapper();
+@@ -910,7 +910,7 @@
+     /* Searching */
+-extern int DBTreeSrTiles();
++extern int DBTreeSrTiles(SearchContext *scx, TileTypeBitMask *mask, int xMask, int (*func)(), ClientData cdarg);
+ extern int DBTreeSrUniqueTiles();
+ extern int DBNoTreeSrTiles();
+ extern int DBTreeSrLabels();
+@@ -919,7 +919,7 @@
+ extern bool DBNearestLabel();
+-extern int DBSrLabelLoc();
++extern int DBSrLabelLoc(CellUse *rootUse, char *name, int (*func)(), ClientData cdarg);
+ extern TileType DBTransformDiagonal();
+ extern int dbcUnconnectFunc(Tile *tile, ClientData clientData); /* (notused) */
+ extern int dbSrConnectFunc(); /*  (struct conSrArg *csa) */
+@@ -978,7 +978,7 @@
+ extern bool DBScaleValue();
+ extern int  DBMergeNMTiles0();
+-extern int  DBSearchLabel();
++extern int  DBSearchLabel(SearchContext *scx, TileTypeBitMask *mask, int xMask, char *pattern, int (*func)(), ClientData cdarg);
+ extern int  dbCellUniqueTileSrFunc();
+ extern void DBWDrawFontLabel();
+
+--- a/select/select.h
++++ b/select/select.h
+@@ -8,9 +8,9 @@
+ extern void SelectArea();
+ extern void SelectChunk();
+ extern void SelectNet();
+-extern void SelectRegion();
+-extern void SelectInit();
+-extern void SelectClear();
++extern void SelectRegion(Rect *rect, int whichWindow);
++extern void SelectInit();
++extern void SelectClear();
+ extern void SelectCell();
+ extern void SelectIntersect();
+
+--- a/select/select.h
++++ b/select/select.h
+@@ -25,7 +25,7 @@
+ extern int SelEnumLabels();
+ extern int SelEnumLabelsMirror();
+-extern void SelectDelete();
+-extern void SelectDeleteUses();
+-extern void SelectCopy();
++extern void SelectDelete(char *key, bool preserve);
++extern void SelectDeleteUses(char *key, bool preserve);
++extern void SelectCopy(Transform *transform);
+ extern void SelectTransform();
+
+--- a/drc/drc.h
++++ b/drc/drc.h
+@@ -280,8 +280,8 @@
+ extern void DRCCheckThis();
+-extern bool DRCWhy();
+-extern void DRCSetStyle();
++extern bool DRCWhy(char *dolist, CellUse *rootUse, Rect *area, bool findonly);
++extern void DRCSetStyle(char *styleName);
+ extern void DRCPrintStyle();

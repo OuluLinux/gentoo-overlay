@@ -1,0 +1,15 @@
+Fix bool typedef issue for C23 compatibility
+
+--- a/utils/magic.h
++++ b/utils/magic.h
+@@ -59,8 +59,12 @@
+ #define FALSE 0
+ #define TRUE 1
+ #ifndef bool
++#ifndef __cplusplus
++#if !defined(__STDC_VERSION__) || (__STDC_VERSION__ < 202311L)
+ typedef unsigned char bool;
++#endif
++#endif
+ #endif
+ #endif	/* MAGIC_IPHONE */

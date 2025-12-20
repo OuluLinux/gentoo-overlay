@@ -1,0 +1,22 @@
+Fix CIFGetOutputScale function call to match its declaration
+
+--- a/bplane/bpDump.c
++++ b/bplane/bpDump.c
+@@ -82,7 +82,7 @@
+     Rect *r;
+ {
+     float oscale;
+-    oscale = CIFGetOutputScale(1000);
++    oscale = CIFGetOutputScale();
+     CIFWriteBox(r, FALSE, oscale);
+ }
+ 
+@@ -174,7 +174,7 @@
+     bpBinArrayDump(binArray, binName, cellDef, transform)
+     HashEntry *binArray; char *binName; CellDef *cellDef; Transform *transform;
+ {
+-    float oscale = CIFGetOutputScale(1000);
++    float oscale = CIFGetOutputScale();
+     int i, j;
+     Point p;
+     Tile *ti;
