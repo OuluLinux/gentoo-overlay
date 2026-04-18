@@ -23,8 +23,7 @@ RESTRICT="bindist mirror"
 
 DEPEND=""
 RDEPEND="${DEPEND}
-	<sys-devel/gcc-9[cxx]
-	>=x11-drivers/nvidia-drivers-396.24[X,uvm]
+	>=x11-drivers/nvidia-drivers-396.24[X]
 	debugger? (
 		sys-libs/libtermcap-compat
 		sys-libs/ncurses-compat:5[tinfo]
@@ -49,7 +48,7 @@ src_unpack() {
 	
 	# Apply patch
 	ebegin "Applying patch cuda_${PV}_linux.run"
-	sh "${DISTDIR}/cuda_${PV}_linux.run" --silent --accept-eula --installdir="${S}" --patchlevel=1
+	sh "${DISTDIR}/cuda_${PV}_linux.run" --silent --accept-eula --installdir="${S}"
 	eend $?
 }
 
@@ -57,7 +56,7 @@ src_prepare() {
 	local cuda_supported_gcc
 
 	# ATTENTION: change requires revbump
-	cuda_supported_gcc="4.7 4.8 4.9 5.3 5.4 6.3 6.4 7.2 7.3 8.4 8.5"
+	cuda_supported_gcc="4.7 4.8 4.9 5.3 5.4 6.3 6.4 7.2 7.3 8.4 8.5 14.3 15.2"
 
 	sed \
 		-e "s:CUDA_SUPPORTED_GCC:${cuda_supported_gcc}:g" \
@@ -101,7 +100,7 @@ src_install() {
 	for i in "${remove[@]}"; do
 		ebegin "Cleaning ${i}..."
 		rm -rf "${i}" || die
-		eend
+		eend $?
 	done
 
 	dodir ${cudadir}
@@ -121,14 +120,15 @@ src_install() {
 }
 
 pkg_postinst_check() {
-	local a b
-	a=( $(ver_sort $(cuda-config -s)) )
+	local a b gcc_ver
+	a=( $(echo $(cuda-config -s) | tr ' ' '\n' | sort -V) )
 	# greatest supported version
 	b="${a[${#a[@]}-1]}"
 
 	# if gcc and if not gcc-version is at least greatest supported
-	if tc-is-gcc && \
-		! ver_test gcc-version -ge ${b}; then
+	if tc-is-gcc; then
+		gcc_ver=$(gcc-version)
+		if ! ver_test ${gcc_ver} -ge ${b}; then
 			ewarn ""
 			ewarn "gcc >= ${b} will not work with CUDA"
 			ewarn "Make sure you set an earlier version of gcc with gcc-config"
@@ -136,6 +136,7 @@ pkg_postinst_check() {
 			ewarn "--compiler-bindir=${EPREFIX}/usr/*pc-linux-gnu/gcc-bin/gcc${b}"
 			ewarn "to the nvcc compiler flags"
 			ewarn ""
+		fi
 	fi
 }
 
